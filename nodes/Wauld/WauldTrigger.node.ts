@@ -51,8 +51,10 @@ export class WauldTrigger implements INodeType {
 		},
 		group: ['trigger'],
 		version: 1,
-		subtitle: 'Credential Issued',
-		description: 'Starts the workflow when a credential is issued in Wauld',
+		subtitle: 'New Credential Issued',
+        description: 'Triggers when a new credential is issued',
+        eventTriggerDescription: 'Waiting for a new credential to be issued in Wauld',
+
 		defaults: {
 			name: 'Wauld Trigger',
 		},
@@ -81,7 +83,8 @@ export class WauldTrigger implements INodeType {
 				required: true,
 				default: '',
 				noDataExpression: true,
-				description: 'Select the Wauld workspace. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				hint: 'Choose the Wauld workspace where the relevant document is located.',
 				typeOptions: {
 					loadOptionsMethod: 'getWorkspaces',
 				},
@@ -93,7 +96,8 @@ export class WauldTrigger implements INodeType {
 				required: true,
 				default: '',
 				noDataExpression: true,
-				description: 'Select the Wauld engagement. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				hint: 'Choose the engagement that contains the document you want this workflow to monitor.',
 				typeOptions: {
 					loadOptionsMethod: 'getEngagements',
 					loadOptionsDependsOn: ['workspace'],
@@ -106,7 +110,8 @@ export class WauldTrigger implements INodeType {
 				required: true,
 				default: '',
 				noDataExpression: true,
-				description: 'Trigger only when a credential is issued from this document. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				hint: 'Choose the document for this trigger. The workflow will run whenever a credential is issued for this document.',
 				typeOptions: {
 					loadOptionsMethod: 'getDocuments',
 					loadOptionsDependsOn: ['engagement'],
@@ -155,7 +160,9 @@ export class WauldTrigger implements INodeType {
 					.filter(
 						(
 							workspace,
-						): workspace is Required<Pick<WauldWorkspace, 'id' | 'name'>> =>
+						): workspace is Required<
+							Pick<WauldWorkspace, 'id' | 'name'>
+						> =>
 							typeof workspace.id === 'string' &&
 							typeof workspace.name === 'string',
 					)
@@ -169,9 +176,13 @@ export class WauldTrigger implements INodeType {
 			async getEngagements(
 				this: ILoadOptionsFunctions,
 			): Promise<INodePropertyOptions[]> {
-				const workspace = this.getCurrentNodeParameter('workspace');
+				const workspace =
+					this.getCurrentNodeParameter('workspace');
 
-				if (typeof workspace !== 'string' || workspace.length === 0) {
+				if (
+					typeof workspace !== 'string' ||
+					workspace.length === 0
+				) {
 					return [];
 				}
 
@@ -202,7 +213,9 @@ export class WauldTrigger implements INodeType {
 					.filter(
 						(
 							engagement,
-						): engagement is Required<Pick<WauldEngagement, 'id' | 'name'>> =>
+						): engagement is Required<
+							Pick<WauldEngagement, 'id' | 'name'>
+						> =>
 							typeof engagement.id === 'string' &&
 							typeof engagement.name === 'string',
 					)
@@ -216,9 +229,13 @@ export class WauldTrigger implements INodeType {
 			async getDocuments(
 				this: ILoadOptionsFunctions,
 			): Promise<INodePropertyOptions[]> {
-				const engagement = this.getCurrentNodeParameter('engagement');
+				const engagement =
+					this.getCurrentNodeParameter('engagement');
 
-				if (typeof engagement !== 'string' || engagement.length === 0) {
+				if (
+					typeof engagement !== 'string' ||
+					engagement.length === 0
+				) {
 					return [];
 				}
 
@@ -249,7 +266,9 @@ export class WauldTrigger implements INodeType {
 					.filter(
 						(
 							document,
-						): document is Required<Pick<WauldDocument, 'id' | 'name'>> =>
+						): document is Required<
+							Pick<WauldDocument, 'id' | 'name'>
+						> =>
 							typeof document.id === 'string' &&
 							typeof document.name === 'string',
 					)
@@ -264,14 +283,20 @@ export class WauldTrigger implements INodeType {
 
 	webhookMethods = {
 		default: {
-			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
+			async checkExists(
+				this: IHookFunctions,
+			): Promise<boolean> {
+				const webhookData =
+					this.getWorkflowStaticData('node');
 
 				return webhookData.webhookId !== undefined;
 			},
 
-			async create(this: IHookFunctions): Promise<boolean> {
-				const webhookUrl = this.getNodeWebhookUrl('default');
+			async create(
+				this: IHookFunctions,
+			): Promise<boolean> {
+				const webhookUrl =
+					this.getNodeWebhookUrl('default');
 
 				if (!webhookUrl) {
 					throw new NodeOperationError(
@@ -287,7 +312,8 @@ export class WauldTrigger implements INodeType {
 					);
 				}
 
-				const credentials = await this.getCredentials('wauldApi');
+				const credentials =
+					await this.getCredentials('wauldApi');
 
 				const response =
 					(await this.helpers.httpRequestWithAuthentication.call(
@@ -322,9 +348,11 @@ export class WauldTrigger implements INodeType {
 					!webhookId &&
 					nestedWebhook &&
 					typeof nestedWebhook === 'object' &&
-					typeof (nestedWebhook as IDataObject).id === 'string'
+					typeof (nestedWebhook as IDataObject).id ===
+						'string'
 				) {
-					webhookId = (nestedWebhook as IDataObject).id as string;
+					webhookId = (nestedWebhook as IDataObject)
+						.id as string;
 				}
 
 				if (!webhookId) {
@@ -334,15 +362,19 @@ export class WauldTrigger implements INodeType {
 					);
 				}
 
-				const webhookData = this.getWorkflowStaticData('node');
+				const webhookData =
+					this.getWorkflowStaticData('node');
 
 				webhookData.webhookId = webhookId;
 
 				return true;
 			},
 
-			async delete(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
+			async delete(
+				this: IHookFunctions,
+			): Promise<boolean> {
+				const webhookData =
+					this.getWorkflowStaticData('node');
 
 				if (webhookData.webhookId === undefined) {
 					return true;
@@ -369,7 +401,9 @@ export class WauldTrigger implements INodeType {
 					throw new NodeOperationError(
 						this.getNode(),
 						`Failed to delete Wauld webhook: ${
-							error instanceof Error ? error.message : String(error)
+							error instanceof Error
+								? error.message
+								: String(error)
 						}`,
 					);
 				}
@@ -381,10 +415,14 @@ export class WauldTrigger implements INodeType {
 		},
 	};
 
-	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+	async webhook(
+		this: IWebhookFunctions,
+	): Promise<IWebhookResponseData> {
 		const bodyData = this.getBodyData() as IDataObject;
 
-		const selectedDocument = this.getNodeParameter('document') as string;
+		const selectedDocument = this.getNodeParameter(
+			'document',
+		) as string;
 
 		const document = bodyData.document;
 
@@ -400,9 +438,7 @@ export class WauldTrigger implements INodeType {
 
 		return {
 			workflowData: [
-				this.helpers.returnJsonArray([
-					bodyData,
-				]),
+				this.helpers.returnJsonArray([bodyData]),
 			],
 		};
 	}

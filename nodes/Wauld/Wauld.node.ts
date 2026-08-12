@@ -16,8 +16,8 @@ export class Wauld implements INodeType {
 		},
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Issue and manage digital credentials with Wauld',
+		subtitle: '={{$parameter["operation"]}}',
+		description: 'Issue digital credentials with Wauld',
 		defaults: {
 			name: 'Wauld',
 		},

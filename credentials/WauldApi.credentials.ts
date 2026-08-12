@@ -26,7 +26,7 @@ export class WauldApi implements ICredentialType {
 			typeOptions: { password: true },
 			required: true,
 			default: '',
-			description: 'Enter your Wauld API access token',
+			description: 'You can find your access token in Wauld under Integrations > n8n Integration. Click Generate Token, then copy and paste the token here.',
 		},
 		{
 			displayName: 'Account ID',
@@ -34,7 +34,7 @@ export class WauldApi implements ICredentialType {
 			type: 'string',
 			required: true,
 			default: '',
-			description: 'Enter your Wauld account ID',
+			description: 'You can find your Wauld Account ID in the URL after wauld.com/. It starts with acc_. Copy and paste it here.',
 		},
 	];
 

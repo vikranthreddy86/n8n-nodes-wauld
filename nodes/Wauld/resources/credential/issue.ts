@@ -7,7 +7,7 @@ const showOnlyForCredentialIssue = {
 
 export const credentialIssueDescription: INodeProperties[] = [
 	{
-		displayName: 'Workspace',
+		displayName: 'Workspace Name or ID',
 		name: 'workspace',
 		type: 'options',
 		required: true,
@@ -15,7 +15,9 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Select the Wauld workspace',
+		description:
+			'Choose from the list, or specify an ID using an expression',
+		hint: 'Choose the Wauld workspace where the document to be issued is located.',
 		typeOptions: {
 			loadOptions: {
 				routing: {
@@ -55,7 +57,7 @@ export const credentialIssueDescription: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Engagement',
+		displayName: 'Engagement Name or ID',
 		name: 'engagement',
 		type: 'options',
 		required: true,
@@ -63,7 +65,9 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Select the Wauld engagement',
+		description:
+			'Choose from the list, or specify an ID using an expression',
+		hint: 'Choose the engagement that contains the document to be issued.',
 		typeOptions: {
 			loadOptionsDependsOn: ['workspace'],
 			loadOptions: {
@@ -104,7 +108,7 @@ export const credentialIssueDescription: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Document',
+		displayName: 'Document Name or ID',
 		name: 'document',
 		type: 'options',
 		required: true,
@@ -112,7 +116,9 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Select the Wauld document to issue',
+		description:
+			'Choose from the list, or specify an ID using an expression',
+		hint: 'Choose the document to issue as a credential.',
 		typeOptions: {
 			loadOptionsDependsOn: ['engagement'],
 			loadOptions: {
@@ -162,7 +168,8 @@ export const credentialIssueDescription: INodeProperties[] = [
 			show: showOnlyForCredentialIssue,
 		},
 		placeholder: 'e.g. John Smith',
-		description: 'Name of the credential recipient',
+		description:
+			'Enter the full name of the recipient who will receive the credential',
 	},
 	{
 		displayName: 'Recipient Email',
@@ -174,13 +181,14 @@ export const credentialIssueDescription: INodeProperties[] = [
 			show: showOnlyForCredentialIssue,
 		},
 		placeholder: 'e.g. john@example.com',
-		description: 'Email address of the credential recipient',
+		description:
+			"Enter the recipient's email address. Wauld will send the issued credential to this address.",
 	},
 	{
-		displayName: 'Attributes',
+		displayName: 'Custom Attributes',
 		name: 'attributes',
 		type: 'fixedCollection',
-		placeholder: 'Add Attribute',
+		placeholder: 'Add Custom Attribute',
 		default: {},
 		typeOptions: {
 			multipleValues: true,
@@ -188,10 +196,11 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Optional attribute values for the selected document',
+		description:
+			'Map any custom attributes required by the selected document. These are recipient-specific values.',
 		options: [
 			{
-				displayName: 'Attribute',
+				displayName: 'Custom Attribute',
 				name: 'attributeValues',
 				values: [
 					{
@@ -200,7 +209,7 @@ export const credentialIssueDescription: INodeProperties[] = [
 						type: 'options',
 						default: '',
 						description:
-							'Select an attribute defined on the selected Wauld document',
+							'Choose a custom attribute from the selected document',
 						typeOptions: {
 							loadOptionsDependsOn: ['document'],
 							loadOptions: {
@@ -244,14 +253,15 @@ export const credentialIssueDescription: INodeProperties[] = [
 						name: 'value',
 						type: 'string',
 						default: '',
-						description: 'Value to use for this credential attribute',
+						description:
+							'Enter the recipient-specific value for this custom attribute',
 					},
 				],
 			},
 		],
 	},
 	{
-		displayName: 'Expiration Date',
+		displayName: 'Expiry Date',
 		name: 'expireTime',
 		type: 'dateTime',
 		default: '',
@@ -259,26 +269,28 @@ export const credentialIssueDescription: INodeProperties[] = [
 			show: showOnlyForCredentialIssue,
 		},
 		description:
-			'Optional date and time when the issued credential expires',
+			'Enter the expiry date for the credential. Leave this field blank if the credential should not expire.',
 	},
 	{
-		displayName: 'Sharable',
+		displayName: 'Shareable',
 		name: 'sharable',
 		type: 'boolean',
 		default: true,
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Whether the credential can be shared',
+		description:
+			'Whether the recipient can share the issued credential externally',
 	},
 	{
-		displayName: 'LinkedIn',
+		displayName: 'Add to LinkedIn',
 		name: 'linkedIn',
 		type: 'boolean',
 		default: true,
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Whether LinkedIn sharing is enabled for the credential',
+		description:
+			'Whether the recipient can add the issued credential to their LinkedIn profile',
 	},
 ];

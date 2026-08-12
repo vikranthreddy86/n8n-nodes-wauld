@@ -16,10 +16,11 @@ export const credentialDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Issue',
+				name: 'Issue Credential',
 				value: 'issue',
 				action: 'Issue a credential',
-				description: 'Issue a credential to a recipient',
+				description:
+					'Issues a new credential using the selected document and recipient details',
 				routing: {
 					request: {
 						method: 'POST',
