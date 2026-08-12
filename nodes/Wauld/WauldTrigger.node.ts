@@ -1,6 +1,8 @@
 import type {
 	IDataObject,
 	IHookFunctions,
+	ILoadOptionsFunctions,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
@@ -12,6 +14,33 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
+interface WauldWorkspace {
+	id?: string;
+	name?: string;
+}
+
+interface WauldEngagement {
+	id?: string;
+	name?: string;
+}
+
+interface WauldDocument {
+	id?: string;
+	name?: string;
+}
+
+interface ListWorkspacesResponse {
+	workspaces?: WauldWorkspace[];
+}
+
+interface ListEngagementsResponse {
+	engagements?: WauldEngagement[];
+}
+
+interface ListDocumentsResponse {
+	documents?: WauldDocument[];
+}
+
 export class WauldTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Wauld Trigger',
@@ -22,7 +51,7 @@ export class WauldTrigger implements INodeType {
 		},
 		group: ['trigger'],
 		version: 1,
-		subtitle: '={{$parameter["event"]}}',
+		subtitle: 'Credential Issued',
 		description: 'Starts the workflow when a credential is issued in Wauld',
 		defaults: {
 			name: 'Wauld Trigger',
@@ -46,20 +75,191 @@ export class WauldTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Event',
-				name: 'event',
+				displayName: 'Workspace Name or ID',
+				name: 'workspace',
 				type: 'options',
-				options: [
-					{
-						name: 'Credential Issued',
-						value: 'CREDENTIAL_ISSUED',
-					},
-				],
-				default: 'CREDENTIAL_ISSUED',
 				required: true,
-				description: 'The Wauld event that starts the workflow',
+				default: '',
+				noDataExpression: true,
+				description: 'Select the Wauld workspace. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				typeOptions: {
+					loadOptionsMethod: 'getWorkspaces',
+				},
+			},
+			{
+				displayName: 'Engagement Name or ID',
+				name: 'engagement',
+				type: 'options',
+				required: true,
+				default: '',
+				noDataExpression: true,
+				description: 'Select the Wauld engagement. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				typeOptions: {
+					loadOptionsMethod: 'getEngagements',
+					loadOptionsDependsOn: ['workspace'],
+				},
+			},
+			{
+				displayName: 'Document Name or ID',
+				name: 'document',
+				type: 'options',
+				required: true,
+				default: '',
+				noDataExpression: true,
+				description: 'Trigger only when a credential is issued from this document. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				typeOptions: {
+					loadOptionsMethod: 'getDocuments',
+					loadOptionsDependsOn: ['engagement'],
+				},
 			},
 		],
+	};
+
+	methods = {
+		loadOptions: {
+			async getWorkspaces(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const credentials = await this.getCredentials('wauldApi');
+
+				const accountId = credentials.accountId;
+
+				if (typeof accountId !== 'string' || accountId.length === 0) {
+					return [];
+				}
+
+				const response =
+					(await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'wauldApi',
+						{
+							method: 'POST',
+							url: 'https://wauld.com/wauld.WorkspaceService/ListWorkspaces',
+							headers: {
+								'Content-Type': 'application/json',
+								'Connect-Protocol-Version': '1',
+							},
+							body: {
+								parent: accountId,
+								pageSize: 25,
+							},
+							json: true,
+						},
+					)) as ListWorkspacesResponse;
+
+				const workspaces = Array.isArray(response.workspaces)
+					? response.workspaces
+					: [];
+
+				return workspaces
+					.filter(
+						(
+							workspace,
+						): workspace is Required<Pick<WauldWorkspace, 'id' | 'name'>> =>
+							typeof workspace.id === 'string' &&
+							typeof workspace.name === 'string',
+					)
+					.map((workspace) => ({
+						name: workspace.name,
+						value: workspace.id,
+					}))
+					.sort((a, b) => a.name.localeCompare(b.name));
+			},
+
+			async getEngagements(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const workspace = this.getCurrentNodeParameter('workspace');
+
+				if (typeof workspace !== 'string' || workspace.length === 0) {
+					return [];
+				}
+
+				const response =
+					(await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'wauldApi',
+						{
+							method: 'POST',
+							url: 'https://wauld.com/wauld.EngagementService/ListEngagements',
+							headers: {
+								'Content-Type': 'application/json',
+								'Connect-Protocol-Version': '1',
+							},
+							body: {
+								parent: workspace,
+								pageSize: 10,
+							},
+							json: true,
+						},
+					)) as ListEngagementsResponse;
+
+				const engagements = Array.isArray(response.engagements)
+					? response.engagements
+					: [];
+
+				return engagements
+					.filter(
+						(
+							engagement,
+						): engagement is Required<Pick<WauldEngagement, 'id' | 'name'>> =>
+							typeof engagement.id === 'string' &&
+							typeof engagement.name === 'string',
+					)
+					.map((engagement) => ({
+						name: engagement.name,
+						value: engagement.id,
+					}))
+					.sort((a, b) => a.name.localeCompare(b.name));
+			},
+
+			async getDocuments(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const engagement = this.getCurrentNodeParameter('engagement');
+
+				if (typeof engagement !== 'string' || engagement.length === 0) {
+					return [];
+				}
+
+				const response =
+					(await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'wauldApi',
+						{
+							method: 'POST',
+							url: 'https://wauld.com/wauld.DocumentService/ListDocuments',
+							headers: {
+								'Content-Type': 'application/json',
+								'Connect-Protocol-Version': '1',
+							},
+							body: {
+								parent: engagement,
+								pageSize: 10,
+							},
+							json: true,
+						},
+					)) as ListDocumentsResponse;
+
+				const documents = Array.isArray(response.documents)
+					? response.documents
+					: [];
+
+				return documents
+					.filter(
+						(
+							document,
+						): document is Required<Pick<WauldDocument, 'id' | 'name'>> =>
+							typeof document.id === 'string' &&
+							typeof document.name === 'string',
+					)
+					.map((document) => ({
+						name: document.name,
+						value: document.id,
+					}))
+					.sort((a, b) => a.name.localeCompare(b.name));
+			},
+		},
 	};
 
 	webhookMethods = {
@@ -80,27 +280,35 @@ export class WauldTrigger implements INodeType {
 					);
 				}
 
+				if (webhookUrl.includes('//localhost')) {
+					throw new NodeOperationError(
+						this.getNode(),
+						'Wauld cannot reach a localhost webhook URL. Configure a publicly accessible n8n webhook URL.',
+					);
+				}
+
 				const credentials = await this.getCredentials('wauldApi');
 
-				const response = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'wauldApi',
-					{
-						method: 'POST',
-						url: 'https://wauld.com/wauld.WebhookService/CreateWebhook',
-						headers: {
-							'Content-Type': 'application/json',
-							'Connect-Protocol-Version': '1',
+				const response =
+					(await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'wauldApi',
+						{
+							method: 'POST',
+							url: 'https://wauld.com/wauld.WebhookService/CreateWebhook',
+							headers: {
+								'Content-Type': 'application/json',
+								'Connect-Protocol-Version': '1',
+							},
+							body: {
+								parent: credentials.accountId,
+								url: webhookUrl,
+								events: ['CREDENTIAL_ISSUED'],
+								name: `n8n Credential Issued - ${this.getNode().id.slice(0, 8)}`,
+							},
+							json: true,
 						},
-						body: {
-							parent: credentials.accountId,
-							url: webhookUrl,
-							events: ['CREDENTIAL_ISSUED'],
-							name: 'n8n Credential Issued',
-						},
-						json: true,
-					},
-				)) as IDataObject;
+					)) as IDataObject;
 
 				let webhookId: string | undefined;
 
@@ -174,14 +382,26 @@ export class WauldTrigger implements INodeType {
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const bodyData = this.getBodyData();
+		const bodyData = this.getBodyData() as IDataObject;
+
+		const selectedDocument = this.getNodeParameter('document') as string;
+
+		const document = bodyData.document;
+
+		if (!document || typeof document !== 'object') {
+			return {};
+		}
+
+		const issuedDocumentId = (document as IDataObject).id;
+
+		if (issuedDocumentId !== selectedDocument) {
+			return {};
+		}
 
 		return {
 			workflowData: [
 				this.helpers.returnJsonArray([
-					{
-						...bodyData,
-					},
+					bodyData,
 				]),
 			],
 		};
