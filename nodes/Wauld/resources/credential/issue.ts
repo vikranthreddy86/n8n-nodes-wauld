@@ -177,6 +177,91 @@ export const credentialIssueDescription: INodeProperties[] = [
 		description: 'Email address of the credential recipient',
 	},
 	{
+		displayName: 'Attributes',
+		name: 'attributes',
+		type: 'fixedCollection',
+		placeholder: 'Add Attribute',
+		default: {},
+		typeOptions: {
+			multipleValues: true,
+		},
+		displayOptions: {
+			show: showOnlyForCredentialIssue,
+		},
+		description: 'Optional attribute values for the selected document',
+		options: [
+			{
+				displayName: 'Attribute',
+				name: 'attributeValues',
+				values: [
+					{
+						displayName: 'Attribute Name',
+						name: 'name',
+						type: 'options',
+						default: '',
+						description:
+							'Select an attribute defined on the selected Wauld document',
+						typeOptions: {
+							loadOptionsDependsOn: ['document'],
+							loadOptions: {
+								routing: {
+									request: {
+										method: 'POST',
+										url: '/wauld.DocumentService/GetDocument',
+										body: {
+											id: '={{$parameter.document}}',
+										},
+									},
+									output: {
+										postReceive: [
+											{
+												type: 'rootProperty',
+												properties: {
+													property: 'customAttributes',
+												},
+											},
+											{
+												type: 'setKeyValue',
+												properties: {
+													name: '={{$responseItem}}',
+													value: '={{$responseItem}}',
+												},
+											},
+											{
+												type: 'sort',
+												properties: {
+													key: 'name',
+												},
+											},
+										],
+									},
+								},
+							},
+						},
+					},
+					{
+						displayName: 'Value',
+						name: 'value',
+						type: 'string',
+						default: '',
+						description: 'Value to use for this credential attribute',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Expiration Date',
+		name: 'expireTime',
+		type: 'dateTime',
+		default: '',
+		displayOptions: {
+			show: showOnlyForCredentialIssue,
+		},
+		description:
+			'Optional date and time when the issued credential expires',
+	},
+	{
 		displayName: 'Sharable',
 		name: 'sharable',
 		type: 'boolean',

@@ -30,6 +30,10 @@ export const credentialDescription: INodeProperties[] = [
 								name: '={{$parameter.recipientName}}',
 								email: '={{$parameter.recipientEmail}}',
 							},
+							attributes:
+								'={{$parameter.attributes.attributeValues || []}}',
+							expireTime:
+								'={{$parameter.expireTime ? $parameter.expireTime + "Z" : undefined}}',
 							sharable: '={{$parameter.sharable}}',
 							linkedIn: '={{$parameter.linkedIn}}',
 						},
