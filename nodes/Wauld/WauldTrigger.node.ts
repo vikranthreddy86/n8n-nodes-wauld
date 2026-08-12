@@ -58,7 +58,6 @@ export class WauldTrigger implements INodeType {
 		defaults: {
 			name: 'Wauld Trigger',
 		},
-		usableAsTool: true,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
