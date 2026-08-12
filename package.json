@@ -27,7 +27,10 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": ["dist/credentials/WauldApi.credentials.js"],
-    "nodes": ["dist/nodes/Wauld/Wauld.node.js"]
+    "nodes": [
+	"dist/nodes/Wauld/Wauld.node.js",
+	"dist/nodes/Wauld/WauldTrigger.node.js"
+]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
