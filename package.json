@@ -1,0 +1,40 @@
+{
+  "name": "n8n-nodes-wauld",
+  "version": "0.1.0",
+  "description": "n8n community node for Wauld to issue and automate digital credentials",
+  "license": "MIT",
+  "homepage": "https://wauld.com",
+  "keywords": ["n8n-community-node-package"],
+  "author": {
+    "name": "Vikranth Reddy Bollam",
+    "email": "vikranthreddybollam86@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikranthreddy86/n8n-nodes-wauld.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": ["dist/credentials/WauldApi.credentials.js"],
+    "nodes": ["dist/nodes/Wauld/Wauld.node.js"]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "release-it": "^19.0.4",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": { "n8n-workflow": "*" }
+}
