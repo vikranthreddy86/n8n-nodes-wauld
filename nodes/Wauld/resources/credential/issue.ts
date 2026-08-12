@@ -63,8 +63,9 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Select the engagement',
+		description: 'Select the Wauld engagement',
 		typeOptions: {
+			loadOptionsDependsOn: ['workspace'],
 			loadOptions: {
 				routing: {
 					request: {
@@ -111,8 +112,9 @@ export const credentialIssueDescription: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForCredentialIssue,
 		},
-		description: 'Select the document to issue',
+		description: 'Select the Wauld document to issue',
 		typeOptions: {
+			loadOptionsDependsOn: ['engagement'],
 			loadOptions: {
 				routing: {
 					request: {
@@ -183,16 +185,6 @@ export const credentialIssueDescription: INodeProperties[] = [
 			show: showOnlyForCredentialIssue,
 		},
 		description: 'Whether the credential can be shared',
-	},
-	{
-		displayName: 'Add to Wallet',
-		name: 'wallet',
-		type: 'boolean',
-		default: true,
-		displayOptions: {
-			show: showOnlyForCredentialIssue,
-		},
-		description: 'Whether wallet functionality is enabled for the credential',
 	},
 	{
 		displayName: 'LinkedIn',

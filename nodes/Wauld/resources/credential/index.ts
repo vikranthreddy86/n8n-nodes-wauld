@@ -31,7 +31,6 @@ export const credentialDescription: INodeProperties[] = [
 								email: '={{$parameter.recipientEmail}}',
 							},
 							sharable: '={{$parameter.sharable}}',
-							wallet: '={{$parameter.wallet}}',
 							linkedIn: '={{$parameter.linkedIn}}',
 						},
 					},
